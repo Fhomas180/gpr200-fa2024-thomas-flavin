@@ -15,7 +15,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/assets/
 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/)
 
 install(FILES ${ASSIGNMENT1_INC} DESTINATION include/assignment1)
-add_executable(assignment1 ${ASSIGNMENT1_SRC} ${ASSIGNMENT1_INC}   "assets/Shaders.cpp" "assets/Shaders.h")
+add_executable(assignment1 ${ASSIGNMENT1_SRC} ${ASSIGNMENT1_INC}    "../../core/thomasLib/Shaders.h") #"../../core/thomasLib/Shaders.cpp"
 target_link_libraries(assignment1 PUBLIC core IMGUI glm)
 target_include_directories(assignment1 PUBLIC ${CORE_INC_DIR} ${stb_INCLUDE_DIR})
 

@@ -20,7 +20,7 @@
 #ifndef SHADER_H
 #define SHADER_H
  
-//#include <ew/external/glad.h>
+#include <ew/external/glad.h>
 
 #include <string>
 #include <fstream>
