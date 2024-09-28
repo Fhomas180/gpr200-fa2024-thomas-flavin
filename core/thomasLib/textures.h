@@ -17,10 +17,10 @@
 //  OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 //  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  OTHER DEALINGS IN THE SOFTWARE.
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef TEXTURE_H
+#define TEXTURE_H
  
-//#include <ew/external/glad.h>
+#include <ew/external/glad.h>
 
 #include <string>
 #include <fstream>

@@ -24,52 +24,19 @@
 #include <ew/ewMath/ewMath.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include "thomasLib/Shaders.h"
+#include <thomasLib/Shaders.h>
 #include <iostream>
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
-
-const char* vertex_shader =
-"#version 400\n"
-"in vec3 vp;"
-"uniform float _Time;"
-"void main() {"
-"vp *= sin(_Time);"
-"  gl_Position = vec4(vp, 1.0);"
+Shader shader("assets/vertexShader.vert", "assets/gragmentShader.frag");
 
 
-""
-"}";
-const char* fragment_shader =
-"#version 400\n"
-"out vec4 frag_colour;"
-"uniform float _Time;"
-"void main() {"
-"  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
-"}";
 
-const char* vertexShaderSource = "#version 330 core\n" 
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"out vec3 ourColor;\n"
-"uniform float _Time;"
-"void main()\n"
-"{\n"
-"   vec3 Cool = vec3(aPos.x + cos(_Time), aPos.y + sin(_Time) , 0)*0.5;  "
-"   gl_Position = vec4(aPos + Cool, 1.0);\n"
-"   ourColor = aColor;\n"
-"}\0";
 
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"uniform float _Time;"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(ourColor *sin(_Time), 1.0f);\n"
-"}\n\0";
+
 
 
 int main() {
@@ -119,7 +86,7 @@ int main() {
     }
     // fragment shader
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fragmentShader, NULL);
     glCompileShader(fragmentShader);
     // check for shader compile errors
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
