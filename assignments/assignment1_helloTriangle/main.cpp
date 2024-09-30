@@ -31,37 +31,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-//"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec2 aTexCoord;\n"
-"out vec2 TexCoord;\n"
-"out vec3 ourColor;\n"
-"uniform float _Time;"
-"void main()\n"
-"{\n"
-"   vec3 Cool = vec3(aPos.x + cos(_Time), aPos.y + sin(_Time) , 0)*0.5;  "
-"   gl_Position = vec4(aPos + Cool, 1.0);\n"
-"   gl_Position = vec4(aPos, 1.0); \n"
-" TexCoord = aTexCoord;\n"
-"   ourColor = aColor;\n"
-"}\0";
-
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"in vec2 TexCoord;\n"
-"uniform float _Time;"
-"uniform sampler2D backgroundTexture;\n"
-"uniform sampler2D characterTexture;"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(ourColor *sin(_Time), 1.0f);\n"
-"   vec4 backgroundColor = texture(backgroundTexture, TexCoord);\n"
-"vec4 characterColor = texture(characterTexture, TexCoord);"
-" FragColor = characterColor * characterColor.a + backgroundColor * (1.0 - characterColor.a);\n"
-"}\n\0";
 
 
 
@@ -103,6 +72,7 @@ int main() {
     // ------------------------------------
     // vertex shader
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
     // check for shader compile errors
@@ -115,8 +85,9 @@ int main() {
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
     // fragment shader
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShader, NULL);
+    //unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
     // check for shader compile errors
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);

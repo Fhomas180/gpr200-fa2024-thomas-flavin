@@ -63,7 +63,7 @@ const char* fragmentShaderSource = "#version 330 core\n"
 #include <ew/external/stb_image.h>
 #include "thomasLib/Shaders.h"
 #include "thomasLib/textures.h"
-#include <iostream>
+//#include <iostream>
 #include <ew/external/stb_image.h>
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height);
@@ -90,37 +90,7 @@ const char* fragment_shader =
 "  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
 "}";*/
 
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-//"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec2 aTexCoord;\n"
-"out vec2 TexCoord;\n"
-"out vec3 ourColor;\n"
-"uniform float _Time;"
-"void main()\n"
-"{\n"
-"   vec3 Cool = vec3(aPos.x + cos(_Time), aPos.y + sin(_Time) , 0)*0.5;  "
-"   gl_Position = vec4(aPos + Cool, 1.0);\n"
-"   gl_Position = vec4(aPos, 1.0); \n"
-" TexCoord = aTexCoord;\n"
-"   ourColor = aColor;\n"
-"}\0";
 
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"in vec2 TexCoord;\n"
-"uniform float _Time;"
-"uniform sampler2D backgroundTexture;\n"
-"uniform sampler2D characterTexture;"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(ourColor *sin(_Time), 1.0f);\n"
-"   vec4 backgroundColor = texture(backgroundTexture, TexCoord);\n"
-"vec4 characterColor = texture(characterTexture, TexCoord);"
-" FragColor = characterColor * characterColor.a + backgroundColor * (1.0 - characterColor.a);\n"
-"}\n\0";
 
 unsigned int loadTexture(const char* path)
 {
@@ -147,6 +117,8 @@ unsigned int loadTexture(const char* path)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+       
+
 
         stbi_image_free(data);
     }
@@ -283,9 +255,9 @@ glEnableVertexAttribArray(1);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 glEnableVertexAttribArray(2);
 
-
-unsigned int backgroundTexture = loadTexture("assets/textures/skyback.png");
-unsigned int characterTexture = loadTexture("assets/textures/tophatslime.png");
+Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+unsigned int backgroundTexture = loadTexture("assets/textures/skybackground.png");
+unsigned int characterTexture = loadTexture("assets/textures/slimeboy.png");
 
 // Configure textures
 glUseProgram(shaderProgram);
