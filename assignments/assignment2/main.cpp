@@ -1,3 +1,22 @@
+//Thomas Flavin
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation files
+//  (the "Software"), to deal in the Software without restriction,
+//  including without limitation the rights to use, copy, modify, merge,
+//  publish, distribute, sublicense, and/or sell copies of the Software,
+//  and to permit persons to whom the Software is furnished to do so,
+//  subject to the following conditions:
+//
+//  The above copyright notice and this permission notice
+//  shall be included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+//  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+//  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+//  OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+//  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
 #include <stdio.h>
 #include <math.h>
 #include <ew/external/glad.h>
@@ -9,21 +28,6 @@
 #include <iostream>
 #include <ew/external/stb_image.h>
 
-// Vertex Shader Source Code
-/*const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"out vec3 ourColor;\n"
-"uniform float _Time;\n"
-"out vec2 TexCoord;" // Add this line
-
-"void main()\n"
-"{\n"
-"   vec3 Cool = vec3(aPos.x + cos(_Time), aPos.y + sin(_Time), 0) * 0.5;\n"
-"   gl_Position = vec4(aPos + Cool, 1.0);\n"
-"   ourColor = aColor;\n"
-"TexCoord = vec2(aTexCoord);"
-"}\0";*/
 //THIS IS THE Vertex Shader Source Code
 const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
@@ -40,21 +44,6 @@ const char* vertexShaderSource = "#version 330 core\n"
 "   TexCoord = aTexCoord;\n" // Pass texture coordinates
 "}\0";
 
-// Fragment Shader Source Code
-/*const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"uniform float _Time;\n"
-"uniform sampler2D background;\n" // For the background texture
-"uniform sampler2D character;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(ourColor * sin(_Time), 1.0f);\n"
-"vec4 bgColor = texture(background, vec2(0.0, 0.0));" // Use appropriate texture coordinates for the background
-"vec4 charColor = texture(character, vec2(0.0, 0.0)); "// Use appropriate texture coordinates for the character
-"FragColor = bgColor * charColor * vec4(1.0, 1.0, 1.0, 0.5);" // Adjust the alpha as needed
-
-"}\n\0";*/
 const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "in vec3 ourColor;\n"
@@ -226,11 +215,7 @@ int main()
     unsigned int characterTexture = loadTexture("assets/textures/tophatslimeboy.png");
     glUniform1i(glGetUniformLocation(shaderProgram, "backgroundTexture"), 0); // texture unit 0
     glUniform1i(glGetUniformLocation(shaderProgram, "characterTexture"), 1); // texture unit 1
-   // int backgroundLoc = glGetUniformLocation(shaderProgram, "backgroundTexture");
-    //glUniform1i(backgroundLoc, 0); // Texture unit 0
-
-    //int characterLoc = glGetUniformLocation(shaderProgram, "characterTexture");
-    //glUniform1i(characterLoc, 1); // Texture unit 1
+   
     std::cout << "Background texture ID: " << backgroundTexture << std::endl;
     std::cout << "Character texture ID: " << characterTexture << std::endl;
 
