@@ -1,58 +1,5 @@
-const char* vertex_shader =
-"#version 400\n"
-"in vec3 vp;"
-"uniform float _Time;"
-"void main() {"
-"vp *= sin(_Time);"
-"  gl_Position = vec4(vp, 1.0);"
-
-
-""
-"}";
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"out vec3 ourColor;\n"
-"uniform float _Time;"
-"void main()\n"
-"{\n"
-"   vec3 Cool = vec3(aPos.x + cos(_Time), aPos.y + sin(_Time) , 0)*0.5;  "
-"   gl_Position = vec4(aPos + Cool, 1.0);\n"
-"   ourColor = aColor;\n"
-"}\0";
-
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"uniform float _Time;"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(ourColor *sin(_Time), 1.0f);\n"
-"}\n\0";
-
-
-//Thomas Flavin
-//  Permission is hereby granted, free of charge, to any person
-//  obtaining a copy of this software and associated documentation files
-//  (the "Software"), to deal in the Software without restriction,
-//  including without limitation the rights to use, copy, modify, merge,
-//  publish, distribute, sublicense, and/or sell copies of the Software,
-//  and to permit persons to whom the Software is furnished to do so,
-//  subject to the following conditions:
-//
-//  The above copyright notice and this permission notice
-//  shall be included in all copies or substantial portions of the Software.
-//
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-//  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-//  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-//  OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-//  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-//  OTHER DEALINGS IN THE SOFTWARE.
 #include <stdio.h>
 #include <math.h>
-
 #include <ew/external/glad.h>
 #include <ew/ewMath/ewMath.h>
 #include <GLFW/glfw3.h>
@@ -61,37 +8,76 @@ const char* fragmentShaderSource = "#version 330 core\n"
 #include <thomasLib/textures.h>
 #include <iostream>
 #include <ew/external/stb_image.h>
-#include "thomasLib/Shaders.h"
-#include "thomasLib/textures.h"
-//#include <iostream>
-#include <ew/external/stb_image.h>
+
+// Vertex Shader Source Code
+/*const char* vertexShaderSource = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec3 aColor;\n"
+"out vec3 ourColor;\n"
+"uniform float _Time;\n"
+"out vec2 TexCoord;" // Add this line
+
+"void main()\n"
+"{\n"
+"   vec3 Cool = vec3(aPos.x + cos(_Time), aPos.y + sin(_Time), 0) * 0.5;\n"
+"   gl_Position = vec4(aPos + Cool, 1.0);\n"
+"   ourColor = aColor;\n"
+"TexCoord = vec2(aTexCoord);"
+"}\0";*/
+//THIS IS THE Vertex Shader Source Code
+const char* vertexShaderSource = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec3 aColor;\n"
+"layout (location = 2) in vec2 aTexCoord;\n" // Make sure you declare the texture coordinates
+"out vec3 ourColor;\n"
+"out vec2 TexCoord;\n" // Pass texture coordinates to fragment shader
+"uniform float _Time;\n"
+"void main()\n"
+"{\n"
+"   vec3 Cool = vec3(aPos.x + cos(_Time), aPos.y + sin(_Time), 0) * 0.5;\n"
+"   gl_Position = vec4(aPos + Cool, 1.0);\n"
+"   ourColor = aColor;\n"
+"   TexCoord = aTexCoord;\n" // Pass texture coordinates
+"}\0";
+
+// Fragment Shader Source Code
+/*const char* fragmentShaderSource = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"in vec3 ourColor;\n"
+"uniform float _Time;\n"
+"uniform sampler2D background;\n" // For the background texture
+"uniform sampler2D character;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(ourColor * sin(_Time), 1.0f);\n"
+"vec4 bgColor = texture(background, vec2(0.0, 0.0));" // Use appropriate texture coordinates for the background
+"vec4 charColor = texture(character, vec2(0.0, 0.0)); "// Use appropriate texture coordinates for the character
+"FragColor = bgColor * charColor * vec4(1.0, 1.0, 1.0, 0.5);" // Adjust the alpha as needed
+
+"}\n\0";*/
+const char* fragmentShaderSource = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"in vec3 ourColor;\n"
+"in vec2 TexCoord;\n" // Add this line
+"uniform float _Time;\n"
+"uniform sampler2D background;\n" // For the background texture
+"uniform sampler2D character;\n"
+"void main()\n"
+"{\n"
+"   vec4 bgColor = texture(background, TexCoord); // Sample background using TexCoord\n"
+"   vec4 charColor = texture(character, TexCoord); // Sample character using TexCoord\n"
+"   FragColor = bgColor * charColor * vec4(1.0, 1.0, 1.0, 0.5); // Combine colors\n"
+"}\n\0";
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height);
-void processInput(GLFWwindow* window);
+void processInput(GLFWwindow * window);
+unsigned int loadTexture(const char* path);
+
+// Screen dimensions
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-   /* const char* vertex_shader =
-    "#version 400\n"
-    "in vec3 vp;"
-    "uniform float _Time;"
-    "void main() {"
-    "vp *= sin(_Time);"
-    "  gl_Position = vec4(vp, 1.0);"
-
-
-    ""
-    "}";
-const char* fragment_shader =
-"#version 400\n"
-"out vec4 frag_colour;"
-"uniform float _Time;"
-"void main() {"
-"  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
-"}";*/
-
-
-
+// Load texture function
 unsigned int loadTexture(const char* path)
 {
     unsigned int textureID;
@@ -102,12 +88,9 @@ unsigned int loadTexture(const char* path)
     if (data)
     {
         GLenum format;
-        if (nrChannels == 1)
-            format = GL_RED;
-        else if (nrChannels == 3)
-            format = GL_RGB;
-        else if (nrChannels == 4)
-            format = GL_RGBA;
+        if (nrChannels == 1) format = GL_RED;
+        else if (nrChannels == 3) format = GL_RGB;
+        else if (nrChannels == 4) format = GL_RGBA;
 
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
@@ -117,8 +100,6 @@ unsigned int loadTexture(const char* path)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-       
-
 
         stbi_image_free(data);
     }
@@ -131,10 +112,9 @@ unsigned int loadTexture(const char* path)
     return textureID;
 }
 
-int main() {
-    //Initialization goes here!
-    // glfw: initialize and configure
-    // ------------------------------
+int main()
+{
+    // Initialization
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -142,60 +122,54 @@ int main() {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-    
-        printf("Initializing...");
-    if (!glfwInit()) {
-        printf("GLFW failed to init!");
-        return 1;
-    }
 
+    // Create window
     GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hello Triangle", NULL, NULL);
     if (window == NULL) {
-        printf("GLFW failed to create window");
+        std::cout << "GLFW failed to create window" << std::endl;
         return 1;
     }
-
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    // Load OpenGL function pointers using GLAD
     if (!gladLoadGL(glfwGetProcAddress)) {
-        printf("GLAD Failed to load GL headers");
+        std::cout << "GLAD Failed to load GL headers" << std::endl;
         return 1;
     }
 
-
-    // build and compile our shader program
-    // ------------------------------------
-    // vertex shader
-
+    // Build and compile shaders
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
-    // check for shader compile errors
+
+    // Check for vertex shader compile errors
     int success;
     char infoLog[512];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
+    if (!success) {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
-    // fragment shader
+
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
-    // check for shader compile errors
+
+    // Check for fragment shader compile errors
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
+    if (!success) {
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
-    // link shaders
+
+    // Link shaders
     unsigned int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
-    // check for linking errors
+
+    // Check for linking errors
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
@@ -204,186 +178,113 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    // Enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        //this is enabling blending
-        glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-        //this is enabling blending
-        glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        float vertices[] = {
+    // Set up vertex data
+    float vertices[] = {
         // positions          // colors           // texture coords
-        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-       - 0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
-
+ 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+ 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+ -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+ -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
     };
-       
 
+    unsigned int indices[] = {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
 
-unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
-};
-unsigned int VBO, VAO, EBO;
-glGenVertexArrays(1, &VAO);
-glGenBuffers(1, &VBO);
-glGenBuffers(1, &EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-  
+    unsigned int VBO, VAO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
- glBindVertexArray(VAO);
-
-glBindBuffer(GL_ARRAY_BUFFER, VBO);
-glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
+    // Bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-// position attribute
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-glEnableVertexAttribArray(0);
-// color attribute
-glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-glEnableVertexAttribArray(1);
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
+    // Color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    // texture coord attribute
+    // Texture coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(2);
 
-Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
-unsigned int backgroundTexture = loadTexture("assets/textures/skybackground.png");
-unsigned int characterTexture = loadTexture("assets/textures/slimeboy.png");
+    // Configure textures
+    glUseProgram(shaderProgram);
+    unsigned int backgroundTexture = loadTexture("assets/textures/skybackg.png");
+    unsigned int characterTexture = loadTexture("assets/textures/tophatslimeboy.png");
+    glUniform1i(glGetUniformLocation(shaderProgram, "backgroundTexture"), 0); // texture unit 0
+    glUniform1i(glGetUniformLocation(shaderProgram, "characterTexture"), 1); // texture unit 1
+   // int backgroundLoc = glGetUniformLocation(shaderProgram, "backgroundTexture");
+    //glUniform1i(backgroundLoc, 0); // Texture unit 0
 
-// Configure textures
-glUseProgram(shaderProgram);
-glUniform1i(glGetUniformLocation(shaderProgram, "backgroundTexture"), 0);
-glUniform1i(glGetUniformLocation(shaderProgram, "characterTexture"), 1);
-// After compiling and linking the shader program
-glUseProgram(shaderProgram);
-
-glActiveTexture(GL_TEXTURE0);
-glBindTexture(GL_TEXTURE_2D, backgroundTexture);
-
-// Bind the character texture to texture unit 1
-glActiveTexture(GL_TEXTURE1);
-glBindTexture(GL_TEXTURE_2D, characterTexture);
-// texture coord attribute
-glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-glEnableVertexAttribArray(2);
-// texture coord attribute
-glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-glEnableVertexAttribArray(2);
+    //int characterLoc = glGetUniformLocation(shaderProgram, "characterTexture");
+    //glUniform1i(characterLoc, 1); // Texture unit 1
+    std::cout << "Background texture ID: " << backgroundTexture << std::endl;
+    std::cout << "Character texture ID: " << characterTexture << std::endl;
 
 
-// For first texture
-glActiveTexture(GL_TEXTURE0);
-glBindTexture(GL_TEXTURE_2D, backgroundTexture);
-
-// For second texture
-glActiveTexture(GL_TEXTURE1);
-glBindTexture(GL_TEXTURE_2D, characterTexture);
-
-
-
-
-
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    // glBindVertexArray(0);
-    // as we only have a single shader, we could also just activate our shader once beforehand if we want to 
-    //glUseProgram(shaderProgram);
-
-    // render loop
-    // -----------
-    while (!glfwWindowShouldClose(window))
+    // Render loop
+   while (!glfwWindowShouldClose(window))
     {
-        // input
-        // -----
+        // Input processing
         processInput(window);
-
         float time = (float)glfwGetTime();
+        glUseProgram(shaderProgram);
         int timeLoc = glGetUniformLocation(shaderProgram, "_Time");
-
         glUniform1f(timeLoc, time);
-        // render
-        // ------
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-       
+        // Render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(shaderProgram);
-        // render the triangle
-        glBindVertexArray(VAO);
-        // Bind textures
+
+        // Draw the background
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+        glUniform1i(glGetUniformLocation(shaderProgram, "background"), 0);  // Set the texture uniform
+
+        // Draw the character
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, characterTexture);
+        glUniform1i(glGetUniformLocation(shaderProgram, "character"), 1);
 
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
+        // Draw the triangles
+        glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        
-            // Use your shader program
-
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-       
-
-            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-            // -------------------------------------------------------------------------------
+        // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-// optional: de-allocate all resources once they've outlived their purpose:
-// ------------------------------------------------------------------------
-glDeleteVertexArrays(1, &VAO);
-glDeleteBuffers(1, &VBO);
-glDeleteBuffers(1, &EBO);
-glDeleteProgram(shaderProgram);
-
-// glfw: terminate, clearing all previously allocated GLFW resources.
-// ------------------------------------------------------------------
-glfwTerminate();
-return 0;
-
-
-printf("Shutting down...");
-
-
+    // Cleanup
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glfwTerminate();
+    return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-    void processInput(GLFWwindow * window)
+// Callback function to adjust viewport when window is resized
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+// Process input
+void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
-
-//    // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-//    // ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
-
 }
