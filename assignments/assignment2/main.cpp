@@ -29,77 +29,15 @@
 #include <ew/external/stb_image.h>
 
 //THIS IS THE Vertex Shader Source Code
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"layout (location = 2) in vec2 aTexCoord;\n" // Make sure you declare the texture coordinates
-"out vec3 ourColor;\n"
-"out vec2 TexCoord;\n" // Pass texture coordinates to fragment shader
-"uniform float _Time;\n"
-"void main()\n"
-"{\n"
-"   vec3 Cool = vec3(aPos.x + cos(_Time), aPos.y + sin(_Time), 0) * 0.5;\n"
-"   gl_Position = vec4(aPos + Cool, 1.0);\n"
-"   ourColor = aColor;\n"
-"   TexCoord = aTexCoord;\n" // Pass texture coordinates
-"}\0";
-
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"in vec2 TexCoord;\n" // Add this line
-"uniform float _Time;\n"
-"uniform sampler2D background;\n" // For the background texture
-"uniform sampler2D character;\n"
-"void main()\n"
-"{\n"
-"   vec4 bgColor = texture(background, TexCoord); // Sample background using TexCoord\n"
-"   vec4 charColor = texture(character, TexCoord); // Sample character using TexCoord\n"
-"   FragColor = bgColor * charColor * vec4(1.0, 1.0, 1.0, 0.5); // Combine colors\n"
-"}\n\0";
-
 void framebuffer_size_callback(GLFWwindow * window, int width, int height);
 void processInput(GLFWwindow * window);
-unsigned int loadTexture(const char* path);
+//unsigned int loadTexture(const char* path);
 
 // Screen dimensions
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-// Load texture function
-unsigned int loadTexture(const char* path)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
 
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrChannels == 1) format = GL_RED;
-        else if (nrChannels == 3) format = GL_RGB;
-        else if (nrChannels == 4) format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Failed to load texture: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
-}
 
 int main()
 {
@@ -126,47 +64,6 @@ int main()
         std::cout << "GLAD Failed to load GL headers" << std::endl;
         return 1;
     }
-
-    // Build and compile shaders
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    // Check for vertex shader compile errors
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // Check for fragment shader compile errors
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    // Link shaders
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    // Check for linking errors
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
     // Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -210,41 +107,49 @@ int main()
     glEnableVertexAttribArray(2);
 
     // Configure textures
-    glUseProgram(shaderProgram);
-    unsigned int backgroundTexture = loadTexture("assets/textures/skybackg.png");
-    unsigned int characterTexture = loadTexture("assets/textures/tophatslimeboy.png");
-    glUniform1i(glGetUniformLocation(shaderProgram, "backgroundTexture"), 0); // texture unit 0
-    glUniform1i(glGetUniformLocation(shaderProgram, "characterTexture"), 1); // texture unit 1
-   
-    std::cout << "Background texture ID: " << backgroundTexture << std::endl;
-    std::cout << "Character texture ID: " << characterTexture << std::endl;
+    Shaders shader("assets/shader/vertexShader.vert", "assets/shader/fragmentShader.frag");
+    Shaders bg("assets/shader/bgvertexShader.vert", "assets/shader/bgfragmentShader.frag");
 
+    Texture2D slimeboy("assets/textures/tophatslimeboy.png", GL_LINEAR ,GL_REPEAT );
+    Texture2D sky("assets/textures/skybackg.png", 0, 0);
+
+    unsigned int slimeboyTex = slimeboy.ID;//loadTexture("assets/textures/tophatslimeboy.png");
+    unsigned int skybg = sky.ID; // loadTexture("assets/textures/skybackg.png");
+    // Set up shader program
+    shader.use();
+    shader.setInt("texture1", 0); // Assign texture units
+    shader.setInt("texture2", 1);
 
     // Render loop
-   while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window))
     {
         // Input processing
         processInput(window);
-        float time = (float)glfwGetTime();
-        glUseProgram(shaderProgram);
-        int timeLoc = glGetUniformLocation(shaderProgram, "_Time");
-        glUniform1f(timeLoc, time);
 
-        // Render
+        // Get the current time for any animations
+        float time = (float)glfwGetTime();
+        shader.setFloat("_Time", time);
+        // Clear the screen
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // Activate and bind the background texture (skybg)
+        //bg.use();
+        //bg.setInt("skybrg", 0);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, skybg);
         // Draw the background
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, backgroundTexture);
-        glUniform1i(glGetUniformLocation(shaderProgram, "background"), 0);  // Set the texture uniform
+        
+        // Example: pass time uniform if needed for animations
+        //glBindVertexArray(VAO); // Use the VAO containing your quad data
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Draw the character
+        // Activate and bind the character texture (slimeboy)
+        shader.use();
+        shader.setInt("slimeboyTex", 1);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, characterTexture);
-        glUniform1i(glGetUniformLocation(shaderProgram, "character"), 1);
-
-        // Draw the triangles
+        glBindTexture(GL_TEXTURE_2D, slimeboyTex);
+        // Draw the character
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
