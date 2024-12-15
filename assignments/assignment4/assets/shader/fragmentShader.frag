@@ -16,11 +16,12 @@ uniform float ambientStrength;
 uniform float specularStrength; 
 uniform float diffuseStrength;
 uniform sampler2D tex;
-
+//for cel shading
+uniform float rimThreshold; 
+uniform float rimcut; 
 void main() {
 	FragColor = texture(tex, TexCoord);
-    FragColor = vec4(1.0);
-    
+ 
 	  // ambient
     vec3 ambient = ambientStrength * lightColor;
     // diffuse 
@@ -28,15 +29,16 @@ void main() {
     vec3 lightDir = normalize(lightPos - FragPos);
     float diff = max(dot(lightDir, norm), 0.0) * diffuseStrength;
     vec3 diffuse = diff * lightColor;
-  
+    FragColor = vec4(norm * 0.5 + 0.5, 1.0);
+    // Calculate diffuse intensity
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);  
   float spec = pow(max(dot(reflectDir, viewDir), 0.0), shininess);
    
     vec3 specular = specularStrength  * lightColor * spec;  
-        
+      
     vec3 result =  objectColor *(ambient + diffuse + specular);
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(result,1.0);
      
     
 }

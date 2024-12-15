@@ -8,6 +8,7 @@ out vec4 vColor;
 out vec3 FragPos;
 out vec3 Normal;
 
+//add the surface vs for the UV, worldPos, worldNormal
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -15,9 +16,10 @@ uniform mat4 projection;
 void main() {
 FragPos = vec3(model * vec4(aPos, 1.0));
 Normal = mat3(transpose(inverse(model))) * aNormal;  
-Normal = aNormal;
+//Normal = aNormal;
      
 	gl_Position = projection * view  *  model * vec4(aPos,1.0);
     //model
+ 
 TexCoord = aTexCoord;
 }

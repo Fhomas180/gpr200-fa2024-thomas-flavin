@@ -53,6 +53,10 @@ float specularK = 0.5f;
 float diffuseK = 0.5f;
 float ambientStrength = 0.1f;
 float shininess = 100.0f;
+//cel shading 
+float rimcut = 0.1f;
+float threshold = 5.4f;
+//end of cell shading
 const unsigned int CUBENUM = 20;
 glm::vec3 cubePositions[CUBENUM];
 glm::vec3 cubeScales[CUBENUM];
@@ -62,49 +66,91 @@ float cubeRotationAngles[CUBENUM];
 float cubeRotationSpeed = 0.7f;
 
 const float cubeVertices[] = {
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f, -1.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f,
+	//-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f,
+	// 0.5f, -0.5f, -0.5f,  1.0f, 0.0f, -1.0f, 1.0f,
+	// 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f, 1.0f,
+	// 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f, 1.0f,
+	//-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,
+	//-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f,
 
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f,
+	//-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f,
+	// 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 1.0f, 1.0f,
+	// 0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f, 1.0f,
+	// 0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f, 1.0f,
+	//-0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  0.0f,
+	//-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f,
 
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
+	//-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
+	//-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f,
+	//-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f,
+	//-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f,
+	//-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  0.0f,
+	//-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
 
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
+	// 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
+	// 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f,
+	// 0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 0.0f,
+	// 0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 0.0f,
+	// 0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  0.0f,
+	// 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
 
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 0.0f,
+	//-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f,
+	// 0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f,
+	// 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
+	// 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
+	//-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f,
+	//-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f, 0.0f,
 
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f
+	//-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f,
+	// 0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f, 1.0f,
+	// 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
+	// 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f,
+	//-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  0.0f,
+	//-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f
+	-0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+	 0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+	-0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
+	-0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+	 0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+	-0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
+
+
 float planeVertices[] = {
 	// positions            // normals         // texcoords
 	 10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
@@ -276,10 +322,12 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 	glBindVertexArray(cubeVAO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(sizeof(float) * 3));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 5));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	unsigned int planeVAO, planeVBO;
@@ -397,7 +445,10 @@ int main() {
 		shader.setFloat("ambientStrength", ambientK);
 		shader.setFloat("specularStrength", specularK);
 		shader.setFloat("diffuseStrength", diffuseK);
-
+		//cel shading
+		shader.setFloat("rimcut", rimcut);
+		shader.setFloat("rimThreshold", threshold);
+		//end of cell shading
 		//brick.Bind(GL_TEXTURE0);
 		glBindVertexArray(VAO);
 		//glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
